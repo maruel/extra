@@ -1,0 +1,27 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+
+[[constraint]]
+  name = "github.com/StackExchange/wmi"
+  version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/google/gousb"
+
+[[constraint]]
+  name = "github.com/maruel/ansi256"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/mattn/go-colorable"
+  version = "0.0.9"
+
+[[constraint]]
+  name = "periph.io/x/periph"
+  version = "3.0.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
