@@ -123,7 +123,10 @@ func registerDev(d Dev, multi bool) error {
 		}
 		// TODO(maruel): UART
 	case *FT232R:
-		// TODO(maruel): SPI, UART
+		if err := spireg.Register(name, nil, -1, t.SPI); err != nil {
+			return err
+		}
+		// TODO(maruel): UART
 	}
 	return nil
 }
@@ -190,10 +193,10 @@ func (d *driver) reset() {
 	// The d2xx can hang for up to the timeout under certain circumstances and the
 	// Go profiler is not very useful to find the source, so use manual logging
 	// to see where time it spent.
-	//d.d2xxOpen = func(i int) (d2xxHandle, int) {
-	//	h, e := d2xxOpen(i)
-	//	return &d2xxLoggingHandle{h}, e
-	//}
+	d.d2xxOpen = func(i int) (d2xxHandle, int) {
+		h, e := d2xxOpen(i)
+		return &d2xxLoggingHandle{h}, e
+	}
 }
 
 func init() {
