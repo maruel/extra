@@ -20,10 +20,15 @@ func TestDriver(t *testing.T) {
 			t.Fatalf("unexpected index %d", i)
 		}
 		d := &d2xxFakeHandle{
-			d:    ftdi.FT232R,
-			vid:  0x0403,
-			pid:  0x6014,
-			data: [][]byte{{}, {0}},
+			d:   ftdi.FT232R,
+			vid: 0x0403,
+			pid: 0x6014,
+			data: [][]byte{
+				// flushPending
+				{},
+				// read after write
+				make([]byte, 62),
+			},
 		}
 		return d, 0
 	}
@@ -127,7 +132,7 @@ func (d *d2xxFakeHandle) d2xxRead(b []byte) (int, int) {
 	return l, 0
 }
 func (d *d2xxFakeHandle) d2xxWrite(b []byte) (int, int) {
-	return 0, 0
+	return len(b), 0
 }
 func (d *d2xxFakeHandle) d2xxGetBitMode() (byte, int) {
 	return 0, 0

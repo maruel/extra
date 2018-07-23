@@ -79,7 +79,6 @@ func testFT232H(d *d2xx.FT232H) error {
 
 func testFT232R(d *d2xx.FT232R) error {
 	// TODO(maruel): Read EEPROM, UA.
-	// TODO(maruel): Remove broken once FT232R driver is stable for GPIO I/O.
 	if err := gpioTest(&loggingPin{d.RX}, &loggingPin{d.TX}, true); err != nil {
 		return err
 	}
@@ -121,7 +120,7 @@ func gpioPerfTest(p gpio.PinIO) error {
 }
 
 // gpioTest ensures connectivity works.
-func gpioTest(p1, p2 gpio.PinIO, broken bool) error {
+func gpioTest(p1, p2 gpio.PinIO, slow bool) error {
 	fmt.Printf("  GPIO functionality on %s and %s:\n", p1, p2)
 	if err := p1.In(gpio.PullNoChange, gpio.NoEdge); err != nil {
 		return err
@@ -129,22 +128,22 @@ func gpioTest(p1, p2 gpio.PinIO, broken bool) error {
 	if err := p2.Out(gpio.Low); err != nil {
 		return err
 	}
+	if slow {
+		// The FT232R is a bit slow to react. Give it a chance.
+		time.Sleep(time.Millisecond)
+	}
 	if l := p1.Read(); l != gpio.Low {
-		if broken {
-			fmt.Printf("TODO(maruel): Not working; %s: expected to read %s but got %s\n", p1, gpio.Low, l)
-		} else {
-			return fmt.Errorf("%s: expected to read %s but got %s", p1, gpio.Low, l)
-		}
+		return fmt.Errorf("%s: expected to read %s but got %s", p1, gpio.Low, l)
 	}
 	if err := p2.Out(gpio.High); err != nil {
 		return err
 	}
+	if slow {
+		// The FT232R is a bit slow to react. Give it a chance.
+		time.Sleep(time.Millisecond)
+	}
 	if l := p1.Read(); l != gpio.High {
-		if broken {
-			fmt.Printf("TODO(maruel): Not working; %s: expected to read %s but got %s\n", p1, gpio.High, l)
-		} else {
-			return fmt.Errorf("%s: expected to read %s but got %s", p1, gpio.High, l)
-		}
+		return fmt.Errorf("%s: expected to read %s but got %s", p1, gpio.High, l)
 	}
 	return nil
 }
