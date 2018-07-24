@@ -106,8 +106,11 @@ func (d *device) setupCommon() error {
 	if e := d.h.d2xxSetChars(0, false, 0, false); e != 0 {
 		return toErr("SetChars", e)
 	}
-	// Not sure: Latency timer at 1ms.
-	if e := d.h.d2xxSetLatencyTimer(1); e != 0 {
+	// Device: Set latency timer at 255ms. The rationale is that for FT232H,
+	// the MPSSE command 'flush' should consistently used whenever needed and we
+	// want this to be apparent. Investigate the effect for FT232R.
+	// Minimum valid value is 2.
+	if e := d.h.d2xxSetLatencyTimer(255); e != 0 {
 		return toErr("SetLatencyTimer", e)
 	}
 	// Not sure: Turn on flow control to synchronize IN requests.

@@ -15,6 +15,8 @@ package d2xx
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
 
 	"periph.io/x/periph/conn"
 	"periph.io/x/periph/conn/gpio"
@@ -215,6 +217,11 @@ func (s *spiMPSEEConn) TxPackets(pkts []spi.Packet) error {
 		ew, er = er, ew
 	}
 
+	log.Printf("idle = %s", maskStr(idle))
+	log.Printf("start1 = %s", maskStr(start1))
+	log.Printf("start2 = %s", maskStr(start2))
+	log.Printf("stop = %s", maskStr(stop))
+
 	// FT232H claims 512 USB packet support, so to reduce the chatter over USB,
 	// try to make all I/O be aligned on this amount. This also removes the need
 	// for heap usage. The idea is to always trail reads by one buffer. This is
@@ -263,6 +270,9 @@ func (s *spiMPSEEConn) TxPackets(pkts []spi.Packet) error {
 			chunk := len(buf) - 3 - len(cmd)
 			if l := len(p.W); chunk > l {
 				chunk = l
+			}
+			if chunk == 0 {
+				panic("remove me")
 			}
 			cmd = append(cmd, op, byte(chunk-1), byte((chunk-1)>>8))
 			cmd = append(cmd, p.W[:chunk]...)
@@ -317,6 +327,19 @@ func (s *spiMPSEEConn) TxPackets(pkts []spi.Packet) error {
 		}
 	}
 	return nil
+}
+
+func maskStr(mask byte) string {
+	var out []string
+	for i := 0; i < 8; i++ {
+		if mask&(1<<uint(i)) != 0 {
+			out = append(out, fmt.Sprintf("D%d", i))
+		}
+	}
+	if len(out) == 0 {
+		return "N/A"
+	}
+	return strings.Join(out, "|")
 }
 
 // CLK returns the SCK (clock) pin.
