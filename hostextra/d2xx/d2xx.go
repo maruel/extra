@@ -107,7 +107,7 @@ func (d *device) setupCommon() error {
 		return toErr("SetChars", e)
 	}
 	// Not sure: Latency timer at 1ms.
-	if e := d.h.d2xxSetLatencyTimer(1); e != 0 {
+	if e := d.h.d2xxSetLatencyTimer(255); e != 0 {
 		return toErr("SetLatencyTimer", e)
 	}
 	// Not sure: Turn on flow control to synchronize IN requests.
